@@ -3,8 +3,8 @@ const fs = require('fs/promises');
 const url = require('url');
 const path = require('path');
 const formidable = require('formidable');
-const psy367 = require('./psy367.js');//ARGS: email, username, password, seed, fn, mn, s, dn, birth_date, bio, img;
-const CoCipher = require('./CoCipher.js');//ARGS: password, seed;
+const psy367 = require('./psy367.js');
+const CoCipher = require('./CoCipher.js');
 
 var form;
 var user_ticket;
