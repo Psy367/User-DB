@@ -73,7 +73,7 @@ http.createServer(async function (req, res) {
                     let birth_date = fields.birth_date;
                     let bio =  fields.bio[0];
                     let profile_pic = files.profile_pic[0];
-                    psy367(email, username, password, Math.round(Math.random() * 1000) + 1, first_name, middle_name, surname, display_name, birth_date, bio, profile_pic);
+                    await psy367(email, username, password, Math.round(Math.random() * 1000) + 1, first_name, middle_name, surname, display_name, birth_date, bio, profile_pic);
                     res.writeHead(200, {'Content-Type': 'text/html'});
                     res.write(await fs.readFile(`./users/${username}/welcome.html`));
                     return(res.end())
