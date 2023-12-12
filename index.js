@@ -12,7 +12,6 @@ var user_ticket;
 http.createServer(async function (req, res) {
     let q = url.parse(req.url, true);
     let ext = path.extname(q.pathname);
-    let write;
     if(ext) {
         if(ext ===  '.html') {
             res.writeHead(200, {'Content-Type': 'text/html'});
@@ -23,36 +22,46 @@ http.createServer(async function (req, res) {
         } else if(ext ===  '.jpg') {
             res.writeHead(200, {'Content-Type': 'image/jpeg'});
         };
-        write = await fs.readFile('./' + q.pathname);
+        res.write(await fs.readFile('./' + q.pathname));
+        return(res.end())
     } else {
         if(q.pathname === '/login') {
             form = new formidable.IncomingForm();
-            form.parse(req, async function(err, fields) {
+            return(form.parse(req, async function(err, fields) {
                 if(err) {
-                    write = err;
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    res.write(err.toString());
+                    return(res.end());
                 } else {
                     let username = fields.username[0].toLowerCase();
                     let password = fields.password[0];
                     files = await fs.readdir('./users');
                     console.log(`login = users: ${files}; user: ${username};`);
                     if(files.includes(username)) {
-                        write = await fs.readFile(`./users/${username}/ticket.json`);
-                        user_ticket = JSON.parse(write);
+                        let user_ticket = JSON.parse(await fs.readFile(`./users/${username}/ticket.json`));
                         if(CoCipher(user_ticket.password, user_ticket.seed) === password) {
-                            write = await fs.readFile(`./users/${username}/welcome.html`);
+                            res.writeHead(200, {'Content-Type': 'text/html'});
+                            res.write(await fs.readFile(`./users/${username}/welcome.html`));
+                            return(res.end())
                         } else {
-                            write = await fs.readFile('./incorrect-password.html');
+                            res.writeHead(200, {'Content-Type': 'text/html'});
+                            res.write(await fs.readFile('./incorrect-password.html'));
+                            return(res.end())
                         };
                     } else {
-                        write = await fs.readFile('./user-not-found.html');
+                        res.writeHead(200, {'Content-Type': 'text/html'});
+                        res.write(await fs.readFile('./user-not-found.html'));
+                        return(res.end())
                     };
                 };
-            });
+            }))
         } else if(q.pathname === '/create-user') {
             form = new formidable.IncomingForm();
-            form.parse(req, async function(err, fields, files) {
+            return(form.parse(req, async function(err, fields, files) {
                 if(err) {
-                    write = err.toString();
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    res.write(err.toString());
+                    return(res.end());
                 } else {
                     let username =  fields.username[0].toLowerCase();
                     let password =  fields.password[0];
@@ -70,14 +79,15 @@ http.createServer(async function (req, res) {
                     let bio =  fields.bio[0];
                     let profile_pic = files.profile_pic[0];
                     psy367(email, username, password, Math.round(Math.random() * 1000) + 1, first_name, middle_name, surname, display_name, birth_date, bio, profile_pic);
-                    write = await fs.readFile(`./users/${username}/welcome.html`);
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    res.write(await fs.readFile(`./users/${username}/welcome.html`));
+                    return(res.end())
                 };
-            });
+            }))
         } else {
-            write = await fs.readFile('./index.html');
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.write(await fs.readFile('./index.html'));
+            return(res.end())
         };
-        res.writeHead(200, {'Content-Type': 'text/html'});
     };
-    res.write(write.toString());
-    return(res.end());
 }).listen(8080);
