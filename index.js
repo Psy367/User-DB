@@ -8,6 +8,7 @@ const CoCipher = require('./CoCipher.js');//ARGS: password, seed;
 
 var form;
 var user_ticket;
+var users;
 
 http.createServer(async function (req, res) {
     let q = url.parse(req.url, true);
@@ -35,10 +36,9 @@ http.createServer(async function (req, res) {
                 } else {
                     let username = fields.username[0].toLowerCase();
                     let password = fields.password[0];
-                    files = await fs.readdir('./users');
-                    console.log(`login = users: ${files}; user: ${username};`);
-                    if(files.includes(username)) {
-                        let user_ticket = JSON.parse(await fs.readFile(`./users/${username}/ticket.json`));
+                    users = await fs.readdir('./users');
+                    if(users.includes(username)) {
+                        user_ticket = JSON.parse(await fs.readFile(`./users/${username}/ticket.json`));
                         if(CoCipher(user_ticket.password, user_ticket.seed) === password) {
                             res.writeHead(200, {'Content-Type': 'text/html'});
                             res.write(await fs.readFile(`./users/${username}/welcome.html`));
@@ -70,12 +70,7 @@ http.createServer(async function (req, res) {
                     let middle_name =  fields.middle_name[0];
                     let surname =  fields.surname[0];
                     let email =  fields.email[0];
-                    let bd = fields.birth_date.join('').split('-');
-                    let birth_date = {
-                        year: bd[0],
-                        month: bd[1],
-                        day: bd[2]
-                    };
+                    let birth_date = fields.birth_date;
                     let bio =  fields.bio[0];
                     let profile_pic = files.profile_pic[0];
                     psy367(email, username, password, Math.round(Math.random() * 1000) + 1, first_name, middle_name, surname, display_name, birth_date, bio, profile_pic);
