@@ -34,9 +34,16 @@ http.createServer(async function (req, res) {
                     res.write(err.toString());
                     return(res.end());
                 } else {
-                    let username = fields.username[0].toLowerCase();
-                    let password = fields.password[0];
-                    users = await fs.readdir('./users');
+                    try {
+                        let username = fields.username[0].toLowerCase();
+                        let password = fields.password[0];
+                        users = await fs.readdir('./users');
+                    } catch(err) {
+                        console.log(err);
+                        res.writeHead(200, {'Content-Type'});
+                        res.write(await fs.readFile('./index.html'));
+                        return(res.end())
+                    };
                     if(users.includes(username)) {
                         user_ticket = JSON.parse(await fs.readFile(`./users/${username}/ticket.json`));
                         if(CoCipher(user_ticket.password, user_ticket.seed) === password) {
@@ -63,17 +70,14 @@ http.createServer(async function (req, res) {
                     res.write(err.toString());
                     return(res.end());
                 } else {
-                    let username =  fields.username[0].toLowerCase();
-                    let password =  fields.password[0];
-                    let display_name =  fields.display_name[0];
-                    let first_name =  fields.first_name[0];
-                    let middle_name =  fields.middle_name[0];
-                    let surname =  fields.surname[0];
-                    let email =  fields.email[0];
-                    let birth_date = fields.birth_date;
-                    let bio =  fields.bio[0];
-                    let profile_pic = files.profile_pic[0];
-                    await psy367(email, username, password, Math.round(Math.random() * 1000) + 1, first_name, middle_name, surname, display_name, birth_date, bio, profile_pic);
+                    try {
+                        await psy367(fields, files);
+                    } catch(err) {
+                        console.log(err);
+                        res.writeHead(200, {'Content-Type': 'text/html'});
+                        res.write(await fs.readFile('./index.html'));
+                        return(res.end())
+                    };
                     res.writeHead(200, {'Content-Type': 'text/html'});
                     res.write(await fs.readFile(`./users/${username}/welcome.html`));
                     return(res.end())
