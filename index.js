@@ -40,7 +40,7 @@ http.createServer(async function (req, res) {
                         users = await fs.readdir('./users');
                     } catch(err) {
                         console.log(err);
-                        res.writeHead(200, {'Content-Type'});
+                        res.writeHead(200, {'Content-Type': 'text/html'});
                         res.write(await fs.readFile('./index.html'));
                         return(res.end())
                     };
