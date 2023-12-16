@@ -1,0 +1,8 @@
+body {
+    background-color: darkblue;
+    border: dashed 2px white;
+    border-radius: 10px;
+}
+h1 {
+    color: white;
+}
