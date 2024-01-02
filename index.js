@@ -49,7 +49,7 @@ http.createServer(async function (req, res) {
                             if(compare === password) {
                                 console.log('password match');
                                 ticket = JSON.parse(await fs.readFile(`./users/${username}/ticket.json`));
-                                return(serve_html(psy367.welcome(ticket)))
+                                return(serve_html(psy367.welcome(ticket, false)))
                             } else {
                                 return(serve_html(await fs.readFile('./incorrect-password.html')))
                             };
@@ -72,7 +72,7 @@ http.createServer(async function (req, res) {
                     try {
                         await psy367.build_user(fields, files);
                         ticket = JSON.parse(await fs.readFile(`./users/${fields.username[0].toLowerCase()}/ticket.json`));
-                        return(serve_html(psy367.welcome(ticket)))
+                        return(serve_html(psy367.welcome(ticket, false)))
                     } catch(err) {
                         console.log(err);
                         return(serve_html(await fs.readFile('./index.html')))
@@ -94,7 +94,7 @@ http.createServer(async function (req, res) {
                         console.log(err);
                         return(serve_html(await fs.readFile('./index.html')))
                     };
-                    return(serve_html(psy367.welcome(ticket)))
+                    return(serve_html(psy367.welcome(ticket, false)))
                 };
             }))
         } else if(address.pathname === '/view-profile') {
@@ -112,9 +112,34 @@ http.createServer(async function (req, res) {
                         console.log(err);
                         return(serve_html(await fs.readFile('./index.html')))
                     };
-                    return(serve_html(psy367.welcome(ticket)))
+                    return(serve_html(psy367.welcome(ticket, false)))
                 };
             }))
+        } else if(address.pathname === '/user-search') {
+            return(serve_html(await psy367.user_search()));
+        } else if(address.pathname === '/stop') {
+            throw new Error('Server stopped by user');
+        } else if(address.pathname === '/view-user') {
+            form = new formidable.IncomingForm();
+            return(form.parse(req, async function(err, fields) {
+                if(err) {
+                    console.log(err);
+                    return(serve_html(await fs.readFile('./index.html')))
+                } else {
+                    try {
+                        let user = JSON.parse(await fs.readFile(`./users/${fields.username[0]}/ticket.json`));
+                        return(serve_html(psy367.welcome(user, true)))
+                    } catch(err) {
+                        console.log(err);
+                        return(serve_html(await fs.readFile('./index.html')))
+                    };
+                };
+            }))
+        } else if(address.pathname === '/me') {
+            return(serve_html(psy367.welcome(ticket, false)))
+        } else if(address.pathname === '/logout') {
+            ticket = {Username: false};
+            return(serve_html(await fs.readFile('./index.html')))
         } else {
             return(serve_html(await fs.readFile('./index.html')))
         };

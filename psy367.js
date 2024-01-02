@@ -69,7 +69,7 @@ function co_cipher(password, seed) {
     .fromCodePoint('0x' + (x.codePointAt(0) ^ ++seed)
     .toString(16))).join(''))
 };
-function welcome(ticket) {
+function welcome(ticket, view_mode) {
     return(`<!DOCTYPE html>
 <html>
     <head>
@@ -84,10 +84,10 @@ function welcome(ticket) {
         <h2>This is ${ticket.DisplayName}'s space!</h2>
         <img src="./profile-pic.jpg" width="33%"></img>
         <p>${ticket.Bio}</p>
-        <div align="center">
-            <a href="/view-profile">View Profile</a>
-            <a href="/modify-style">Modify Style</a>
-        </div>
+        <div align="center">${[
+            '<a href="/view-profile">View Profile</a> <a href="/modify-style">Modify Style</a> <a href="/user-search">User Search</a> <a href="/logout">Logout</a>',
+            '<a  href="/me">Home</a> <a href="/user-search">User Search</a>'
+        ][+view_mode]}</div>
     </body>
 </html>`)
 };
@@ -181,6 +181,39 @@ p {
     ticket.Styles.Heading2Color = fields.heading_2_color[0];
     ticket.Styles.BioColor = fields.bio_color[0];
     fs.writeFile(`./users/${ticket.Username}/ticket.json`, JSON.stringify(ticket));
-}
+};
 
-module.exports = {welcome, co_cipher, build_user, modify_style, update_style, view_profile, update_profile};
+async function user_search() {
+    const fs = require('fs/promises');
+    let users = await fs.readdir('./users');
+    let table_body = '<tr><th>Username</th><th>Display Name</th><th>View Profile</th></tr>';
+    for(let i = 0; i < users.length; i++) {
+        let user = JSON.parse(await fs.readFile(`./users/${users[i]}/ticket.json`));
+        table_body += `<tr>
+    <td>${user.Username}</td>
+    <td>${user.DisplayName}</td>
+    <td>
+        <form action="./view-user" method="post">
+            <input name="username" value="${user.Username}" hidden />
+            <input type="submit" value="View" />
+        </form>
+    </td>
+</tr>`;
+    };
+    return(`<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Quasi=Satya®</title>
+    </head>
+    <body>
+        <h1>User Search</h1>
+        <hr />
+        <table>
+            ${table_body}
+        </table>
+        <a href="./me">Home</a>
+    </body>`)
+};
+
+module.exports = { welcome, co_cipher, build_user, modify_style, update_style, view_profile, update_profile, user_search };
